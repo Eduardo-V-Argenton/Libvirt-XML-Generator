@@ -1,32 +1,34 @@
-#include "VirtualMachine.hpp"
+#include "src/VirtualMachine.hpp"
 
-#include "elements/Domain.hpp"
-#include "elements/Memory.hpp"
-#include "elements/Cpu.hpp"
-#include "elements/Os.hpp"
-#include "elements/Features.hpp"
-#include "elements/SystemClock.hpp"
-#include "elements/PowerManagement.hpp"
-#include "elements/devices/Devices.hpp"
+#include "src/elements/Domain.hpp"
+#include "src/elements/Memory.hpp"
+#include "src/elements/Cpu.hpp"
+#include "src/elements/Os.hpp"
+#include "src/elements/Features.hpp"
+#include "src/elements/SystemClock.hpp"
+#include "src/elements/PowerManagement.hpp"
+#include "src/elements//Devices.hpp"
+#include "src/elements/devices/Controller.hpp"
+#include "src/elements/devices/Disk.hpp"
 
 #include <iostream>
 #include <fstream>
 
 int main() {
-	VirtualMachine vm;
+	PlaceHolder::Main::VirtualMachine vm;
 
 	// Domain
 	vm.domain.name = "Win11";
 	vm.domain.description = "Um teste";
 
 	// OS
-	Os::BootDisk bootdisk;
+	PlaceHolder::Elements::OsElements::Os::BootDisk bootdisk;
 	vm.os.bootdisk = bootdisk;
 
 	// CPU
 	vm.cpu.cpuNum = 10;
 	vm.cpu.cpupin.quantVcpu = 10;
-	Cpu::CpuPin::VCpuPin vcpupin;
+	PlaceHolder::Elements::CpuElement::Cpu::CpuPin::VCpuPin vcpupin;
 
 	vcpupin.vcpu = 0;
 	vcpupin.cpuset = 1;
@@ -68,7 +70,7 @@ int main() {
 	vcpupin.cpuset = 11;
 	vm.cpu.cpupin.cpus.push_back(vcpupin);
 
-	Cpu::CpuPin::IOThreadPin ioThreadPin;
+	PlaceHolder::Elements::CpuElement::Cpu::CpuPin::IOThreadPin ioThreadPin;
 
 	ioThreadPin.ioThread = 1;
 	ioThreadPin.cpuset = 1;
@@ -76,13 +78,13 @@ int main() {
 
 	vm.cpu.cpupin.emulatorPin = 0;
 
-	Cpu::Topology topology;
+	PlaceHolder::Elements::CpuElement::Cpu::Topology topology;
 	topology.cores = 5;
 	topology.sockets = 1;
 	topology.threads = 2;
 	vm.cpu.topology = topology;
 
-	Cpu::Feature feature;
+	PlaceHolder::Elements::CpuElement::Cpu::Feature feature;
 	feature.name = "topoext";
 	vm.cpu.features.push_back(feature);
 
@@ -90,7 +92,7 @@ int main() {
 	vm.memory.memory = 10240;
 
 	// SystemClock
-	SystemClock::Timer timer;
+	PlaceHolder::Elements::SystemClockElements::SystemClock::Timer timer;
 
 	timer.name = "rtc";
 	timer.tickpolicy = "catchup";
@@ -110,7 +112,7 @@ int main() {
 	// Devices
 
 	// Disk
-	DiskLocal disco;
+	PlaceHolder::Elements::Devices::DiskElements::DiskLocal disco;
 	disco.source.file = "/vm_disk/vm_teste.qcow2";
 	disco.driver.type = "qcow2";
 	disco.target.dev = "sdb";
@@ -119,14 +121,14 @@ int main() {
 
 	// Controller
 	for (int i = 0; i < 6; i++) {
-		Controller controllerPci;
+		PlaceHolder::Elements::Devices::ControllerElements::Controller controllerPci;
 		controllerPci.type = "pci";
 		controllerPci.model = "pcie-root-port";
 		vm.devices.controllers.push_back(controllerPci);
 	}
 
 	// HotDev PCI
-	Devices::Hotdev::PCISource gpu;
+	PlaceHolder::Elements::DeviceElements::Devices::Hotdev::PCISource gpu;
 	gpu.bus = 3;
 	gpu.domain = 0;
 	gpu.function = 0;
