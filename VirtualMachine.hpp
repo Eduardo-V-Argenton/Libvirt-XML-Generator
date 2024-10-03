@@ -1,7 +1,14 @@
 #ifndef VIRTUALMACHINE_HPP
 #define VIRTUALMACHINE_HPP
 
-#include "elements.hpp"
+#include "elements/Domain.hpp"
+#include "elements/Memory.hpp"
+#include "elements/Cpu.hpp"
+#include "elements/Os.hpp"
+#include "elements/Features.hpp"
+#include "elements/SystemClock.hpp"
+#include "elements/PowerManagement.hpp"
+#include "elements/devices/Devices.hpp"
 
 struct VirtualMachine : XmlAble {
 	Domain domain;
@@ -11,7 +18,7 @@ struct VirtualMachine : XmlAble {
 	Features features;
 	SystemClock clock;
 	PowerManagement powerManagemente;
-	Device devices;
+	Devices devices;
 
 	std::string getXml() override {
 		return std::format("{}{}{}{}{}{}{}{}</domain>", domain.getXml(),

@@ -1,5 +1,14 @@
-#include "elements.hpp"
-#include "virtualMachine.hpp"
+#include "VirtualMachine.hpp"
+
+#include "elements/Domain.hpp"
+#include "elements/Memory.hpp"
+#include "elements/Cpu.hpp"
+#include "elements/Os.hpp"
+#include "elements/Features.hpp"
+#include "elements/SystemClock.hpp"
+#include "elements/PowerManagement.hpp"
+#include "elements/devices/Devices.hpp"
+
 #include <iostream>
 #include <fstream>
 
@@ -101,7 +110,7 @@ int main() {
 	// Devices
 
 	// Disk
-	Device::DiskLocal disco;
+	DiskLocal disco;
 	disco.source.file = "/vm_disk/vm_teste.qcow2";
 	disco.driver.type = "qcow2";
 	disco.target.dev = "sdb";
@@ -110,14 +119,14 @@ int main() {
 
 	// Controller
 	for (int i = 0; i < 6; i++) {
-		Device::Controller controllerPci;
+		Controller controllerPci;
 		controllerPci.type = "pci";
 		controllerPci.model = "pcie-root-port";
 		vm.devices.controllers.push_back(controllerPci);
 	}
 
 	// HotDev PCI
-	Device::Hotdev::PCISource gpu;
+	Devices::Hotdev::PCISource gpu;
 	gpu.bus = 3;
 	gpu.domain = 0;
 	gpu.function = 0;
