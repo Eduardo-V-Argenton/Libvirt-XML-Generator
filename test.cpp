@@ -101,7 +101,7 @@ int main() {
 	// Devices
 
 	// Disk
-	Disk disco;
+	DiskLocal disco;
 	disco.source.file = "/vm_disk/vm_teste.qcow2";
 	disco.driver.type = "qcow2";
 	disco.target.dev = "sdb";
