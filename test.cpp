@@ -7,9 +7,18 @@
 #include "src/elements/Features.hpp"
 #include "src/elements/SystemClock.hpp"
 #include "src/elements/PowerManagement.hpp"
-#include "src/elements//Devices.hpp"
+#include "src/elements/Devices.hpp"
+
+#include "src/elements/devices/Console.hpp"
 #include "src/elements/devices/Controller.hpp"
 #include "src/elements/devices/Disk.hpp"
+#include "src/elements/devices/Emulator.hpp"
+#include "src/elements/devices/Filesystem.hpp"
+#include "src/elements/devices/GraphicalFrameBuffer.hpp"
+#include "src/elements/devices/HotDev.hpp"
+#include "src/elements/devices/Network.hpp"
+#include "src/elements/devices/Tpm.hpp"
+#include "src/elements/devices/Video.hpp"
 
 #include <iostream>
 #include <fstream>
@@ -128,11 +137,12 @@ int main() {
 	}
 
 	// HotDev PCI
-	PlaceHolder::Elements::DeviceElements::Devices::Hotdev::PCISource gpu;
+	PlaceHolder::Elements::Devices::HotDevElements::HotDevPCISource gpu;
 	gpu.bus = 3;
 	gpu.domain = 0;
 	gpu.function = 0;
 	gpu.slot = 0;
+	vm.devices.hotDevPCIs.push_back(gpu);
 	
 	// Create an ofstream object for writing to a file
     std::ofstream outFile("output.xml");

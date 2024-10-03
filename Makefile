@@ -3,6 +3,8 @@ CXX = g++
 CXXFLAGS = -std=c++20
 
 SOURCES = $(shell find $(SRC_DIR) -name '*.cpp')
+# SRC_DIR = src
+# SRC = $(shell find $(SRC_DIR) -name '*.cpp')
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
