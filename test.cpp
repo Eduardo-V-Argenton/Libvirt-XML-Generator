@@ -101,22 +101,23 @@ int main() {
 	// Devices
 
 	// Disk
-	DiskLocal disco;
+	Device::DiskLocal disco;
 	disco.source.file = "/vm_disk/vm_teste.qcow2";
 	disco.driver.type = "qcow2";
 	disco.target.dev = "sdb";
 	disco.target.bus = "sata";
-	vm.devices.push_back(disco);
+	vm.devices.disks.push_back(disco);
 
 	// Controller
 	for (int i = 0; i < 6; i++) {
-		Controller::Pci controllerPci;
+		Device::Controller controllerPci;
+		controllerPci.type = "pci";
 		controllerPci.model = "pcie-root-port";
-		vm.devices.push_back(controllerPci);
+		vm.devices.controllers.push_back(controllerPci);
 	}
 
 	// HotDev PCI
-	Hotdev::PCISource gpu;
+	Device::Hotdev::PCISource gpu;
 	gpu.bus = 3;
 	gpu.domain = 0;
 	gpu.function = 0;

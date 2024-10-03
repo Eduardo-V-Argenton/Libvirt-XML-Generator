@@ -2,11 +2,9 @@
 #define ELEMENTS_HPP
 
 #include <format>
+#include <iostream>
 #include <string>
-#include <variant>
 #include <vector>
-
-using namespace std;
 
 struct XmlAble {
 	virtual std::string getXml() = 0;
@@ -93,8 +91,8 @@ struct Cpu : XmlAble {
 
 		std::string placement = "static";
 		int quantVcpu;
-		vector<VCpuPin> cpus;
-		vector<IOThreadPin> ioThreads;
+		std::vector<VCpuPin> cpus;
+		std::vector<IOThreadPin> ioThreads;
 		int emulatorPin;
 
 		std::string getXml() override {
@@ -145,7 +143,7 @@ struct Cpu : XmlAble {
 	Topology topology;
 	int cpuNum;
 	CpuPin cpupin;
-	vector<Feature> features;
+	std::vector<Feature> features;
 
 	std::string getXml() override {
 		std::string xml = std::format(
@@ -233,7 +231,7 @@ struct SystemClock : XmlAble {
 	};
 
 	std::string offset = "localtime";
-	vector<Timer> timers;
+	std::vector<Timer> timers;
 
 	std::string getXml() override {
 		std::string xml = std::format("<clock offset=\"{}\">", offset);
@@ -256,171 +254,194 @@ struct PowerManagement : XmlAble {
 			suspend_to_mem ? "yes" : "no", suspend_to_disk ? "yes" : "no");
 	}
 };
+struct Device : XmlAble {
+	struct Emulator : XmlAble {
+		std::string emulator;
 
-struct Emulator : XmlAble {
-	std::string emulator;
-
-	std::string getXml() override {
-		return std::format("<emulator>{}</emulator>", emulator);
-	}
-};
-
-struct Disk : XmlAble {
-  protected:
-	Disk() = default;
-
-  public:
-	struct Source : XmlAble {
-		std::string getXml() override { return ""; }
+		std::string getXml() override {
+			return std::format("<emulator>{}</emulator>", emulator);
+		}
 	};
 
-	struct Driver : XmlAble {
-		std::string name = "qemu";
+	struct Disk : XmlAble {
+	  protected:
+		Disk() = default;
+
+	  public:
+		struct Source : XmlAble {
+			std::string getXml() override { return ""; }
+		};
+
+		struct Driver : XmlAble {
+			std::string name = "qemu";
+			std::string type;
+
+			std::string getXml() override {
+				return std::format("<driver name=\"{}\" type=\"{}\" />", name,
+								   type);
+			}
+		};
+
+		struct Target : XmlAble {
+			std::string dev;
+			std::string bus;
+
+			std::string getXml() override {
+				return std::format("<target dev=\"{}\" bus=\"{}\" />", dev,
+								   bus);
+			}
+		};
+
+		std::string type = "file";
+		std::string device = "disk";
+		// std::string snapshot = "";  /ToDo implementar snapshot
+		bool readonly = false;
+		Target target;
+		Source source;
+		Driver driver;
+
+		std::string getXml() override {
+			return std::format(
+				"<disk type=\"{}\" device=\"{}\">{}{}{}{}</disk>", type, device,
+				driver.getXml(), source.getXml(), target.getXml(),
+				readonly ? "</readonly>" : "");
+		}
+	};
+
+	struct DiskLocal : Disk {
+
+		struct Source : Disk::Source {
+			std::string file;
+
+			std::string getXml() override {
+				return std::format("<source file=\"{}\" />", file);
+			}
+		};
+		Source source;
+	};
+
+	struct DiskNetwork : Disk {
+
+		struct Source : Disk::Source {
+			struct Host : XmlAble {
+				std::string name = "";
+				std::string port = "";
+
+				std::string getXml() override {
+					return std::format("<host name=\"{}\" port=\"{}\" />", name,
+									   port);
+				}
+			};
+
+			struct Auth : XmlAble {
+				std::string username = "";
+				std::string type = "";
+				std::string usage = "";
+
+				std::string getXml() override {
+					return std::format(
+						"<auth username=\"{}\" ><secret type=\"{}\" "
+						"usage=\"{}\" /></auth>",
+						username, type, usage);
+				}
+			};
+
+			std::string protocol;
+			std::string name;
+			std::string query = "";
+			bool ssl;
+			Host host;
+			Auth auth;
+
+			std::string getXml() override {
+				std::string xml = std::format(
+					"<source protocol=\"{}\" name=\"{}\"", protocol, name);
+
+				if (query != "") {
+					xml.append(std::format(" query=\"{}\" ", query));
+				}
+				xml.append(">");
+				xml.append(host.getXml());
+				if (auth.username != "") {
+					xml.append(auth.getXml());
+				}
+				xml.append(
+					std::format("<ssl verify=\"{}\"/>", ssl ? "yes" : "no"));
+				xml.append("</source>");
+				return xml;
+			}
+		};
+		Source source;
+	};
+
+	// ToDo
+	struct Filesystem {};
+
+	struct Controller : XmlAble {
 		std::string type;
-
-		std::string getXml() override {
-			return std::format("<driver name=\"{}\" type=\"{}\" />", name,
-							   type);
-		}
-	};
-
-	struct Target : XmlAble {
-		std::string dev;
-		std::string bus;
-
-		std::string getXml() override {
-			return std::format("<target dev=\"{}\" bus=\"{}\" />", dev, bus);
-		}
-	};
-
-	std::string type = "file";
-	std::string device = "disk";
-	// std::string snapshot = "";  /ToDo implementar snapshot
-	bool readonly = false;
-	Target target;
-	Source source;
-	Driver driver;
-
-	std::string getXml() override {
-		return std::format("<disk type=\"{}\" device=\"{}\">{}{}{}{}</disk>",
-						   type, device, driver.getXml(), source.getXml(),
-						   driver.getXml(), readonly ? "</readonly>" : "");
-	}
-};
-
-struct DiskLocal : Disk {
-
-	struct Source : XmlAble {
-		std::string file;
-
-		std::string getXml() override {
-			return std::format("<source file=\"{}\" />", file);
-		}
-	};
-};
-
-struct DiskNetwork : Disk {
-
-	struct Source : XmlAble {
-		struct Host : XmlAble {
-			std::string name = "";
-			std::string port = "";
-
-			std::string getXml() override {
-				return std::format("<host name=\"{}\" port=\"{}\" />", name,
-								   port);
-			}
-		};
-
-		struct Auth : XmlAble {
-			std::string username = "";
-			std::string type = "";
-			std::string usage = "";
-
-			std::string getXml() override {
-				return std::format("<auth username=\"{}\" ><secret type=\"{}\" "
-								   "usage=\"{}\" /></auth>",
-								   username, type, usage);
-			}
-		};
-
-		std::string protocol;
-		std::string name;
-		std::string query = "";
-		bool ssl;
-		Host host;
-		Auth auth;
-
-		std::string getXml() override {
-			std::string xml = std::format("<source protocol=\"{}\" name=\"{}\"",
-										  protocol, name);
-
-			if (query != "") {
-				xml.append(std::format(" query=\"{}\" ", query));
-			}
-			xml.append(">");
-			xml.append(host.getXml());
-			if (auth.username != "") {
-				xml.append(auth.getXml());
-			}
-			xml.append(std::format("<ssl verify=\"{}\"/>", ssl ? "yes" : "no"));
-			xml.append("</source>");
-			return xml;
-		}
-	};
-};
-
-// ToDo
-struct Filesystem {};
-
-struct Controller {
-	struct USB {
 		std::string model;
 		int ports;
+
+		std::string getXml() override {
+			std::string xml = std::format(
+				"<controller type=\"{}\" model=\"{}\" ", type, model);
+			if (type == "usb") {
+				xml.append(std::format("ports=\"{}\" ", ports));
+			}
+			xml.append("/>");
+			return xml;
+		};
 	};
 
-	struct Pci {
+	struct Hotdev {
+		struct USBSource {
+			std::string vendor;
+			std::string product;
+		};
+
+		struct PCISource {
+			int domain;
+			int bus;
+			int slot;
+			int function;
+		};
+
+		const std::string mode = "subsystem";
+		std::string type;
+		bool managed;
+	};
+
+	struct Video {
 		std::string model;
 	};
+
+	// ToDo
+	struct GraphicalFrameBuffer {};
+
+	// ToDo
+	struct Console {};
+
+	// ToDo
+	struct Network {};
+
+	// ToDo
+	struct TPM {};
+
+	Emulator emulator;
+	std::vector<Disk> disks;
+	std::vector<Controller> controllers;
+
+	std::string getXml() override {
+		std::string xml = "<devices>";
+		for (Controller controller : controllers) {
+			xml.append(controller.getXml());
+		}
+		std::cout << disks.size();
+		for (Disk disk : disks) {
+			xml.append(disk.getXml());
+		}
+		xml.append("</devices>");
+		return xml;
+	}
 };
-
-struct Hotdev {
-	struct USBSource {
-		std::string vendor;
-		std::string product;
-	};
-
-	struct PCISource {
-		int domain;
-		int bus;
-		int slot;
-		int function;
-	};
-
-	const std::string mode = "subsystem";
-	std::string type;
-	bool managed;
-};
-
-struct Video {
-	std::string model;
-};
-
-// ToDo
-struct GraphicalFrameBuffer {};
-
-// ToDo
-struct Console {};
-
-// ToDo
-struct Network {};
-
-// ToDo
-struct TPM {};
-
-using Devices =
-	std::variant<Emulator, Disk, Filesystem, Controller::Pci, Controller::USB,
-				 Hotdev::PCISource, Hotdev::USBSource, Video,
-				 GraphicalFrameBuffer, Console, Network, TPM>;
-
 #endif

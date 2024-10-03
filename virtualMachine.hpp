@@ -2,8 +2,6 @@
 #define VIRTUALMACHINE_HPP
 
 #include "elements.hpp"
-#include <format>
-#include <string>
 
 struct VirtualMachine : XmlAble {
 	Domain domain;
@@ -13,14 +11,14 @@ struct VirtualMachine : XmlAble {
 	Features features;
 	SystemClock clock;
 	PowerManagement powerManagemente;
-	vector<Devices> devices;
+	Device devices;
 
-	string getXml() override {
-		std::string xml = std::format(
-			"{}{}{}{}{}{}{}</domain>", domain.getXml(), memory.getXml(),
-			cpu.getXml(), os.getXml(), features.getXml(), clock.getXml(),
-			powerManagemente.getXml());
-		return xml;
+	std::string getXml() override {
+		return std::format("{}{}{}{}{}{}{}{}</domain>", domain.getXml(),
+						   memory.getXml(), cpu.getXml(), os.getXml(),
+						   features.getXml(), clock.getXml(),
+						   powerManagemente.getXml(), devices.getXml());
 	}
 };
+
 #endif
