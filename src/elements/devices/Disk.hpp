@@ -3,21 +3,47 @@
 
 #include "../../XmlAble.hpp"
 #include <string>
+#include <variant>
 
 namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace Devices {
 namespace DiskElements {
 
-struct Disk : LibvirtXMLGenerator::Interfaces::XmlAble {
-  protected:
-	Disk() = default;
+struct SourceLocal : Interfaces::XmlAble {
 
-  public:
-	struct Source : LibvirtXMLGenerator::Interfaces::XmlAble {
+	std::string file;
+	std::string getXml() const override;
+};
+
+struct SourceNetwork : Interfaces::XmlAble {
+	struct Host : XmlAble {
+		std::string name = "";
+		std::string port = "";
+
 		std::string getXml() const override;
 	};
-	
+
+	struct Auth : XmlAble {
+		std::string username = "";
+		std::string type = "";
+		std::string usage = "";
+
+		std::string getXml() const override;
+	};
+
+	std::string protocol;
+	std::string name;
+	std::string query = "";
+	bool ssl;
+	Host host;
+	Auth auth;
+
+	std::string getXml() const override;
+};
+
+struct Disk : Interfaces::XmlAble {
+    
 	struct Driver : LibvirtXMLGenerator::Interfaces::XmlAble {
 		std::string name = "qemu";
 		std::string type;
@@ -27,7 +53,7 @@ struct Disk : LibvirtXMLGenerator::Interfaces::XmlAble {
 
 	struct Target : LibvirtXMLGenerator::Interfaces::XmlAble {
 		std::string dev;
-		std::string bus;
+		std::string bus = "sata";
 
 		std::string getXml() const override;
 	};
@@ -37,51 +63,12 @@ struct Disk : LibvirtXMLGenerator::Interfaces::XmlAble {
 	// std::string snapshot = "";  /ToDo implementar snapshot
 	bool readonly = false;
 	Target target;
-	Source source;
+	std::variant<SourceLocal, SourceNetwork> source;
 	Driver driver;
 
 	std::string getXml() const override;
 };
 
-struct DiskLocal : Disk {
-
-	struct Source : Disk::Source {
-		std::string file;
-
-		std::string getXml() const override;
-	};
-	Source source;
-};
-
-struct DiskNetwork : Disk {
-
-	struct Source : Disk::Source {
-		struct Host : XmlAble {
-			std::string name = "";
-			std::string port = "";
-
-			std::string getXml() const override;
-		};
-
-		struct Auth : XmlAble {
-			std::string username = "";
-			std::string type = "";
-			std::string usage = "";
-
-			std::string getXml() const override;
-		};
-
-		std::string protocol;
-		std::string name;
-		std::string query = "";
-		bool ssl;
-		Host host;
-		Auth auth;
-
-		std::string getXml() const override;
-	};
-	Source source;
-};
 } // namespace DiskElements
 } // namespace Devices
 } // namespace Elements

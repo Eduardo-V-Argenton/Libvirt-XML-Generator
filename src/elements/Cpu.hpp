@@ -10,7 +10,7 @@ namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace CpuElement {
 
-struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble,LibvirtXMLGenerator::Interfaces::Checkable {
+struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble{
 	struct CpuPin : XmlAble {
 		struct VCpuPin : XmlAble {
 			int vcpu;
@@ -21,7 +21,7 @@ struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble,LibvirtXMLGenerator::Inter
 
 		struct IOThreadPin : XmlAble {
 			int ioThread;
-			int cpuset;
+			std::string cpuset;
 
 			std::string getXml() const override;
 		};
@@ -30,7 +30,7 @@ struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble,LibvirtXMLGenerator::Inter
 		int quantVcpu;
 		std::vector<VCpuPin> cpus;
 		std::vector<IOThreadPin> ioThreads;
-		int emulatorPin;
+		std::string emulatorPin;
 
 		std::string getXml() const override;
 	};
@@ -58,7 +58,6 @@ struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble,LibvirtXMLGenerator::Inter
 	std::vector<Feature> features;
 
 	std::string getXml() const override;
-	void check() const override;
 };
 } // namespace CpuElement
 } // namespace Elements

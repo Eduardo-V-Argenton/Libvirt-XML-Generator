@@ -8,12 +8,11 @@
 namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace MemoryElements {
-struct Memory : Interfaces::XmlAble,Interfaces::Checkable {
+struct Memory : Interfaces::XmlAble {
 	std::string unit = "M";
 	int memory;
 
 	std::string getXml() const override;
-	void check() const override;
 };
 } // namespace MemoryElements
 } // namespace Elements

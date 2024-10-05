@@ -3,46 +3,46 @@
 #include <string>
 
 std::string
-LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::Source::getXml() const {
-	return "";
-}
-
-std::string
-LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::Driver::getXml() const {
+LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::Driver::getXml()
+	const {
 	return std::format("<driver name=\"{}\" type=\"{}\" />", name, type);
 }
 
 std::string
-LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::Target::getXml() const {
+LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::Target::getXml()
+	const {
 	return std::format("<target dev=\"{}\" bus=\"{}\" />", dev, bus);
 }
 
-std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::getXml() const {
-	return std::format("<disk type=\"{}\" device=\"{}\">{}{}{}{}</disk>", type,
-					   device, driver.getXml(), source.getXml(),
-					   target.getXml(), readonly ? "</readonly>" : "");
+std::string
+LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk::getXml() const {
+	return std::format(
+		"<disk type=\"{}\" device=\"{}\">{}{}{}{}</disk>", type, device,
+		driver.getXml(),
+		std::visit([](auto &&arg) { return arg.getXml(); }, source),
+		target.getXml(), readonly ? "</readonly>" : "");
 }
 
 std::string
-LibvirtXMLGenerator::Elements::Devices::DiskElements::DiskLocal::Source::getXml()
+LibvirtXMLGenerator::Elements::Devices::DiskElements::SourceLocal::getXml()
 	const {
 	return std::format("<source file=\"{}\" />", file);
 }
 
-std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::DiskNetwork::Source::
-	Host::getXml() const {
+std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::
+	SourceNetwork::Host::getXml() const {
 	return std::format("<host name=\"{}\" port=\"{}\" />", name, port);
 }
 
-std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::DiskNetwork::Source::
-	Auth::getXml() const {
+std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::
+	SourceNetwork::Auth::getXml() const {
 	return std::format("<auth username=\"{}\" ><secret type=\"{}\" "
 					   "usage=\"{}\" /></auth>",
 					   username, type, usage);
 }
 
 std::string
-LibvirtXMLGenerator::Elements::Devices::DiskElements::DiskNetwork::Source::getXml()
+LibvirtXMLGenerator::Elements::Devices::DiskElements::SourceNetwork::getXml()
 	const {
 
 	std::string xml =
