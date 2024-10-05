@@ -11,23 +11,23 @@
 #include "elements/PowerManagement.hpp"
 #include "elements/SystemClock.hpp"
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Main {
 
-struct VirtualMachine : PlaceHolder::Interfaces::XmlAble {
-	PlaceHolder::Elements::DomainElement::Domain domain;
-	PlaceHolder::Elements::MemoryElements::Memory memory;
-	PlaceHolder::Elements::CpuElement::Cpu cpu;
-	PlaceHolder::Elements::OsElements::Os os;
-	Placeholder::Elements::FeaturesElements::Features features;
-	PlaceHolder::Elements::SystemClockElements::SystemClock clock;
-	PlaceHolder::Elements::PowerManagementElements::PowerManagement pm;
+struct VirtualMachine : LibvirtXMLGenerator::Interfaces::XmlAble {
+	LibvirtXMLGenerator::Elements::DomainElement::Domain domain;
+	LibvirtXMLGenerator::Elements::MemoryElements::Memory memory;
+	LibvirtXMLGenerator::Elements::CpuElement::Cpu cpu;
+	LibvirtXMLGenerator::Elements::OsElements::Os os;
+	LibvirtXMLGenerator::Elements::FeaturesElements::Features features;
+	LibvirtXMLGenerator::Elements::SystemClockElements::SystemClock clock;
+	LibvirtXMLGenerator::Elements::PowerManagementElements::PowerManagement pm;
 	Elements::DeviceElements::Devices devices;
 
 	std::string getXml() const override;
 };
 } // namespace Main
 
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 
 #endif

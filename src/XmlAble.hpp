@@ -3,12 +3,12 @@
 
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Interfaces {
 
 struct XmlAble {
 	virtual std::string getXml() const = 0;
 };
 } // namespace Interfaces
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

@@ -4,12 +4,12 @@
 #include "../../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace Devices {
 namespace HotDevElements {
 
-struct HotDevUSBSource : PlaceHolder::Interfaces::XmlAble {
+struct HotDevUSBSource : LibvirtXMLGenerator::Interfaces::XmlAble {
 	std::string vendor;
 	std::string product;
 	bool managed = true;
@@ -17,7 +17,7 @@ struct HotDevUSBSource : PlaceHolder::Interfaces::XmlAble {
 	std::string getXml() const override;
 };
 
-struct HotDevPCISource : PlaceHolder::Interfaces::XmlAble {
+struct HotDevPCISource : LibvirtXMLGenerator::Interfaces::XmlAble {
 	int domain;
 	int bus;
 	int slot;
@@ -29,5 +29,5 @@ struct HotDevPCISource : PlaceHolder::Interfaces::XmlAble {
 } // namespace HotDevElements
 } // namespace Devices
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

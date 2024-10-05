@@ -4,11 +4,11 @@
 #include "../XmlAble.hpp"
 #include <string>
 
-namespace Placeholder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace FeaturesElements {
 
-struct Features : PlaceHolder::Interfaces::XmlAble {
+struct Features : LibvirtXMLGenerator::Interfaces::XmlAble {
 	struct SpinLocks : XmlAble {
 		bool enabled = true;
 		int retries = 8191;
@@ -32,8 +32,6 @@ struct Features : PlaceHolder::Interfaces::XmlAble {
 	std::string getXml() const override;
 };
 } // namespace FeaturesElements
-
 } // namespace Elements
-
-} // namespace Placeholder
+} // namespace LibvirtXMLGenerator
 #endif

@@ -2,14 +2,15 @@
 #define CPU_HPP
 
 #include "../XmlAble.hpp"
+#include "../Checkable.hpp"
 #include <string>
 #include <vector>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace CpuElement {
 
-struct Cpu : PlaceHolder::Interfaces::XmlAble {
+struct Cpu : LibvirtXMLGenerator::Interfaces::XmlAble,LibvirtXMLGenerator::Interfaces::Checkable {
 	struct CpuPin : XmlAble {
 		struct VCpuPin : XmlAble {
 			int vcpu;
@@ -51,16 +52,16 @@ struct Cpu : PlaceHolder::Interfaces::XmlAble {
 
 	std::string mode = "host-passthrough";
 	std::string cache_mode = "passthrough";
-	std::string check = "none";
+	std::string cpuCheck = "none";
 	Topology topology;
-	int cpuNum;
 	CpuPin cpupin;
 	std::vector<Feature> features;
 
 	std::string getXml() const override;
+	void check() const override;
 };
 } // namespace CpuElement
 } // namespace Elements
-} // namespace Ph
+} // namespace LibvirtXMLGenerator
 
 #endif

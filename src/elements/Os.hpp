@@ -4,11 +4,11 @@
 #include "../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace OsElements {
 
-struct Os : PlaceHolder::Interfaces::XmlAble {
+struct Os : LibvirtXMLGenerator::Interfaces::XmlAble {
 	struct BootDisk : XmlAble {
 		std::string type = "hd";
 		// disk??
@@ -40,5 +40,5 @@ struct Os : PlaceHolder::Interfaces::XmlAble {
 };
 } // namespace OsElements
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

@@ -4,28 +4,28 @@
 #include "../../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace Devices {
 namespace DiskElements {
 
-struct Disk : PlaceHolder::Interfaces::XmlAble {
+struct Disk : LibvirtXMLGenerator::Interfaces::XmlAble {
   protected:
 	Disk() = default;
 
   public:
-	struct Source : PlaceHolder::Interfaces::XmlAble {
+	struct Source : LibvirtXMLGenerator::Interfaces::XmlAble {
 		std::string getXml() const override;
 	};
 	
-	struct Driver : PlaceHolder::Interfaces::XmlAble {
+	struct Driver : LibvirtXMLGenerator::Interfaces::XmlAble {
 		std::string name = "qemu";
 		std::string type;
 
 		std::string getXml() const override;
 	};
 
-	struct Target : PlaceHolder::Interfaces::XmlAble {
+	struct Target : LibvirtXMLGenerator::Interfaces::XmlAble {
 		std::string dev;
 		std::string bus;
 
@@ -85,5 +85,5 @@ struct DiskNetwork : Disk {
 } // namespace DiskElements
 } // namespace Devices
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

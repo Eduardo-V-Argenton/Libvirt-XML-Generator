@@ -3,7 +3,7 @@
 #include <string>
 
 std::string
-PlaceHolder::Elements::Devices::ControllerElements::Controller::getXml() const {
+LibvirtXMLGenerator::Elements::Devices::ControllerElements::Controller::getXml() const {
 	std::string xml =
 		std::format("<controller type=\"{}\" model=\"{}\" ", type, model);
 	if (type == "usb") {

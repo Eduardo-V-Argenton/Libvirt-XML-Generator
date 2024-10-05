@@ -1,6 +1,6 @@
 #include "Memory.hpp"
 #include <format>
 
-std::string PlaceHolder::Elements::MemoryElements::Memory::getXml() const {
+std::string LibvirtXMLGenerator::Elements::MemoryElements::Memory::getXml() const {
 	return std::format("<memory unit=\"{}\">{}</memory>", unit, memory);
 }

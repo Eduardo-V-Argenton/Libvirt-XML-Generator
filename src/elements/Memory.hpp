@@ -2,19 +2,20 @@
 #define MEMORY_HPP
 
 #include "../XmlAble.hpp"
+#include "../Checkable.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace MemoryElements {
-struct Memory : PlaceHolder::Interfaces::XmlAble {
+struct Memory : Interfaces::XmlAble,Interfaces::Checkable {
 	std::string unit = "M";
 	int memory;
 
 	std::string getXml() const override;
+	void check() const override;
 };
 } // namespace MemoryElements
 } // namespace Elements
-
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

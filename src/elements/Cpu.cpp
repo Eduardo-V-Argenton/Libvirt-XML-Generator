@@ -2,16 +2,16 @@
 #include <string>
 #include <format>
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::CpuPin::VCpuPin::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::CpuPin::VCpuPin::getXml() const {
 	return std::format("<vcpupin vcpu=\"{}\" cpuset=\"{}\"/>", vcpu, cpuset);
 }
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::CpuPin::IOThreadPin::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::CpuPin::IOThreadPin::getXml() const {
 	return std::format("<iothreadpin iothread=\"{}\" cpuset=\"{}\"/>", ioThread,
 					   cpuset);
 }
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::CpuPin::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::CpuPin::getXml() const {
 	std::string xml =
 		std::format("<vcpu placement=\"{}\">{}</vcpu>", placement, quantVcpu);
 
@@ -30,20 +30,20 @@ std::string PlaceHolder::Elements::CpuElement::Cpu::CpuPin::getXml() const {
 	return xml;
 }
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::Topology::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::Topology::getXml() const {
 	return std::format(
 		"<topology sockets=\"{}\" cores=\"{}\" threads=\"{}\" />", sockets,
 		cores, threads);
 }
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::Feature::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::Feature::getXml() const {
 	return std::format("<feature policy=\"{}\" name=\"{}\" />", policy, name);
 }
 
-std::string PlaceHolder::Elements::CpuElement::Cpu::getXml() const {
+std::string LibvirtXMLGenerator::Elements::CpuElement::Cpu::getXml() const {
 	std::string xml = std::format(
 		"{}<cpu mode=\"{}\" check=\"{}\">{}<cache mode=\"{}\"/>",
-		cpupin.getXml(), mode, check, topology.getXml(), cache_mode);
+		cpupin.getXml(), mode, cpuCheck, topology.getXml(), cache_mode);
 
 	for (const Feature &feature : features) {
 		xml.append(feature.getXml());

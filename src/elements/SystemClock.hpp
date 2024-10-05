@@ -5,11 +5,11 @@
 #include <string>
 #include <vector>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace SystemClockElements {
 
-struct SystemClock : PlaceHolder::Interfaces::XmlAble {
+struct SystemClock : LibvirtXMLGenerator::Interfaces::XmlAble {
 	struct Timer : XmlAble {
 		std::string name;
 		std::string tickpolicy = "";
@@ -25,5 +25,5 @@ struct SystemClock : PlaceHolder::Interfaces::XmlAble {
 };
 } // namespace SystemClockElements
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

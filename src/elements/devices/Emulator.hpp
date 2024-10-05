@@ -4,12 +4,12 @@
 #include "../../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace Devices {
 namespace EmulatorElements {
     
-struct Emulator : PlaceHolder::Interfaces::XmlAble {
+struct Emulator : LibvirtXMLGenerator::Interfaces::XmlAble {
 	std::string emulator;
 
 	std::string getXml() const override;
@@ -18,5 +18,5 @@ struct Emulator : PlaceHolder::Interfaces::XmlAble {
 } // namespace EmulatorElements
 } // namespace Devices
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

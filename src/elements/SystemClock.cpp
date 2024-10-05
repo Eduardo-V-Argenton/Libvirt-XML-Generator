@@ -3,7 +3,7 @@
 #include <string>
 
 std::string
-PlaceHolder::Elements::SystemClockElements::SystemClock::Timer::getXml() const {
+LibvirtXMLGenerator::Elements::SystemClockElements::SystemClock::Timer::getXml() const {
 	std::string xml = std::format("<timer name=\"{}\" present=\"{}\"", name,
 								  present ? "yes" : "no");
 	if (tickpolicy != "") {
@@ -14,7 +14,7 @@ PlaceHolder::Elements::SystemClockElements::SystemClock::Timer::getXml() const {
 }
 
 std::string
-PlaceHolder::Elements::SystemClockElements::SystemClock::getXml() const {
+LibvirtXMLGenerator::Elements::SystemClockElements::SystemClock::getXml() const {
 	std::string xml = std::format("<clock offset=\"{}\">", offset);
 	for (const Timer &timer : timers) {
 		xml.append(timer.getXml());

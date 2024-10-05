@@ -4,12 +4,12 @@
 #include "../../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace Devices {
 namespace ControllerElements {
 
-struct Controller : PlaceHolder::Interfaces::XmlAble {
+struct Controller : LibvirtXMLGenerator::Interfaces::XmlAble {
 	std::string type;
 	std::string model;
 	int ports;
@@ -19,5 +19,5 @@ struct Controller : PlaceHolder::Interfaces::XmlAble {
 } // namespace ControllerElements
 } // namespace Devices
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif

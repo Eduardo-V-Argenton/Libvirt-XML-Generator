@@ -2,20 +2,20 @@
 #include <format>
 
 std::string
-Placeholder::Elements::FeaturesElements::Features::SpinLocks::getXml() const {
+LibvirtXMLGenerator::Elements::FeaturesElements::Features::SpinLocks::getXml() const {
 	return std::format("<spinlocks state=\"{}\" retries=\"{}\"/>",
 					   enabled ? "on" : "off", retries);
 }
 
 std::string
-Placeholder::Elements::FeaturesElements::Features::HyperV::getXml() const {
+LibvirtXMLGenerator::Elements::FeaturesElements::Features::HyperV::getXml() const {
 	return std::format("<hyperv><relaxed state=\"{}\"/><vapic "
 					   "state=\"{}\"/>{}</hyperv>",
 					   relaxed ? "on" : "off", vapic ? "on" : "off",
 					   spinLocks.getXml());
 }
 
-std::string Placeholder::Elements::FeaturesElements::Features::getXml() const {
+std::string LibvirtXMLGenerator::Elements::FeaturesElements::Features::getXml() const {
 	std::string xml = std::format("<features>");
 
 	if (acpi) {

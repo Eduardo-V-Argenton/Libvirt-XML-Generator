@@ -3,7 +3,7 @@
 #include <string>
 
 std::string
-PlaceHolder::Elements::Devices::HotDevElements::HotDevPCISource::getXml()
+LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevPCISource::getXml()
 	const {
 	return std::format(
 		"<hostdev mode=\"subsystem\" type=\"pci\" "
@@ -13,7 +13,7 @@ PlaceHolder::Elements::Devices::HotDevElements::HotDevPCISource::getXml()
 }
 
 std::string
-PlaceHolder::Elements::Devices::HotDevElements::HotDevUSBSource::getXml()
+LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevUSBSource::getXml()
 	const {
 	return std::format("<hostdev mode=\"subsystem\" type=\"usb\" "
 					   "managed=\"{}\"><source><vendor id=\"{}\"/><product "

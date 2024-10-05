@@ -30,6 +30,8 @@
 *.exe
 *.out
 *.app
+.cache 
+
 CMakeUserPresets.json
 output.xml
 main

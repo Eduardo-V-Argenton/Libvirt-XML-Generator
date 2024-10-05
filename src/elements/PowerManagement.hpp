@@ -4,11 +4,11 @@
 #include "../XmlAble.hpp"
 #include <string>
 
-namespace PlaceHolder {
+namespace LibvirtXMLGenerator {
 namespace Elements {
 namespace PowerManagementElements {
 
-struct PowerManagement : PlaceHolder::Interfaces::XmlAble {
+struct PowerManagement : LibvirtXMLGenerator::Interfaces::XmlAble {
 	bool suspend_to_disk = false;
 	bool suspend_to_mem = false;
 
@@ -16,5 +16,5 @@ struct PowerManagement : PlaceHolder::Interfaces::XmlAble {
 };
 } // namespace PowerManagementElements
 } // namespace Elements
-} // namespace PlaceHolder
+} // namespace LibvirtXMLGenerator
 #endif
