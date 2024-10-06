@@ -25,6 +25,7 @@ struct Devices : LibvirtXMLGenerator::Interfaces::XmlAble {
 	std::vector<LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk> disks;
 	std::vector<LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevUSBSource> hotDevUSBs;
 	std::vector<LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevPCISource> hotDevPCIs;
+	LibvirtXMLGenerator::Elements::Devices::TpmElements::Tpm tpm;
 	std::vector<LibvirtXMLGenerator::Elements::Devices::ControllerElements::Controller>
 		controllers;
 

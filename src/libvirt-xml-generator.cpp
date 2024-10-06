@@ -3,22 +3,22 @@
 #include "elements/Cpu.hpp"
 #include "elements/Devices.hpp"
 #include "elements/Domain.hpp"
-#include "elements/Features.hpp"
+// #include "elements/Features.hpp"
 #include "elements/Memory.hpp"
 #include "elements/Os.hpp"
 #include "elements/PowerManagement.hpp"
 #include "elements/SystemClock.hpp"
 
-#include "elements/devices/Console.hpp"
+// #include "elements/devices/Console.hpp"
 #include "elements/devices/Controller.hpp"
 #include "elements/devices/Disk.hpp"
-#include "elements/devices/Emulator.hpp"
-#include "elements/devices/Filesystem.hpp"
-#include "elements/devices/GraphicalFrameBuffer.hpp"
+// #include "elements/devices/Emulator.hpp"
+// #include "elements/devices/Filesystem.hpp"
+// #include "elements/devices/GraphicalFrameBuffer.hpp"
 #include "elements/devices/HotDev.hpp"
-#include "elements/devices/Network.hpp"
+// #include "elements/devices/Network.hpp"
 #include "elements/devices/Tpm.hpp"
-#include "elements/devices/Video.hpp"
+// #include "elements/devices/Video.hpp"
 
 #include <array>
 #include <cstdio>
@@ -29,6 +29,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <variant>
 #include <vector>
 
 std::string exec(const char *cmd);
@@ -62,6 +63,8 @@ void setDevices(LibvirtXMLGenerator::VirtualMachine &vm,
 				cxxopts::ParseResult &result);
 void setPM(LibvirtXMLGenerator::VirtualMachine &vm,
 		   cxxopts::ParseResult &result);
+void setTpm(LibvirtXMLGenerator::VirtualMachine &vm,
+			cxxopts::ParseResult &result);
 
 // ToDo Invalid Argument handling
 int main(int argc, char *argv[]) {
@@ -174,7 +177,17 @@ cxxopts::Options commands() {
 		"suspend-to-mem", "Enable VM's to suspend to mem",
 		cxxopts::value<bool>()->default_value("false"))(
 		"suspend-to-disk", "Enable VM's to suspend to disk",
-		cxxopts::value<bool>()->default_value("false"));
+		cxxopts::value<bool>()->default_value("false"))(
+		"emulated-tpm",
+		"Add a emulated TPM device into VM format like model,version. "
+		"Available models are 'crb' and 'tis' and version '1.2' and '2.0'. "
+		"Only accept that one or passthrough-tpm, dont both",
+		cxxopts::value<std::vector<std::string>>())(
+		"passthrough-tpm",
+		"Add the host's TPM device into VM format like model,path. "
+		"Available models are 'crb' and 'tis'. "
+		"Only accept that one or emulated-tpm, dont both",
+		cxxopts::value<std::vector<std::string>>());
 	return options;
 }
 
@@ -202,8 +215,8 @@ void setCpu(LibvirtXMLGenerator::VirtualMachine &vm,
 	vm.cpu.mode = result["cpu-mode"].as<std::string>();
 	std::vector<int> cpuTopology =
 		result["cpu-topology"].as<std::vector<int>>();
-	if(cpuTopology.size() != 3){
-	   throw std::invalid_argument("Invalid CPU Topology");
+	if (cpuTopology.size() != 3) {
+		throw std::invalid_argument("Invalid CPU Topology");
 	}
 	int quantVcpu = cpuTopology[0] * cpuTopology[1] * cpuTopology[2];
 	bool autoCpuDist = result["auto-cpu-placement"].as<bool>();
@@ -328,8 +341,8 @@ void setDisk(LibvirtXMLGenerator::VirtualMachine &vm,
 	if (result.count("disk")) {
 		std::vector<std::string> disks =
 			result["disk"].as<std::vector<std::string>>();
-		if (disks.size() % 3 != 0){
-		    throw std::invalid_argument("Invalid Disk");
+		if (disks.size() % 3 != 0) {
+			throw std::invalid_argument("Invalid Disk");
 		}
 		LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk disk;
 		int numDisks = result.count("disk") * 3;
@@ -352,8 +365,8 @@ void setRemoteDisk(LibvirtXMLGenerator::VirtualMachine &vm,
 	if (result.count("remote-disk")) {
 		std::vector<std::string> disks =
 			result["remote-disk"].as<std::vector<std::string>>();
-		if (disks.size() % 9 != 0){
-		    throw std::invalid_argument("Invalid remote disk");
+		if (disks.size() % 9 != 0) {
+			throw std::invalid_argument("Invalid remote disk");
 		}
 		LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk disk;
 		int numDisks = result.count("disk") * 9;
@@ -393,9 +406,9 @@ void setHotDevUsb(LibvirtXMLGenerator::VirtualMachine &vm,
 	if (result.count("usb-device")) {
 		std::vector<std::string> hotDevUsbs =
 			result["usb-device"].as<std::vector<std::string>>();
-			
-		if (hotDevUsbs.size() % 2 != 0){
-		    throw std::invalid_argument("Invalid USB device config");
+
+		if (hotDevUsbs.size() % 2 != 0) {
+			throw std::invalid_argument("Invalid USB device config");
 		}
 		int numUSBs = result.count("usb-device") * 2;
 		LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevUSBSource
@@ -414,8 +427,8 @@ void setHotDevPci(LibvirtXMLGenerator::VirtualMachine &vm,
 	if (result.count("pci-device")) {
 		std::vector<int> hotDevPCIs =
 			result["pci-device"].as<std::vector<int>>();
-		if (hotDevPCIs.size() % 4 != 0){
-		    throw std::invalid_argument("Invalid PCI device config");
+		if (hotDevPCIs.size() % 4 != 0) {
+			throw std::invalid_argument("Invalid PCI device config");
 		}
 		int numPCIs = result.count("pci-device") * 4;
 		LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevPCISource
@@ -438,6 +451,7 @@ void setDevices(LibvirtXMLGenerator::VirtualMachine &vm,
 	setController(vm, result);
 	setHotDevUsb(vm, result);
 	setHotDevPci(vm, result);
+	setTpm(vm, result);
 }
 
 void saveFile(LibvirtXMLGenerator::VirtualMachine &vm,
@@ -462,4 +476,34 @@ void setPM(LibvirtXMLGenerator::VirtualMachine &vm,
 
 	vm.pm.suspend_to_mem = result["suspend-to-mem"].as<bool>();
 	vm.pm.suspend_to_disk = result["suspend-to-disk"].as<bool>();
+}
+
+void setTpm(LibvirtXMLGenerator::VirtualMachine &vm,
+			cxxopts::ParseResult &result) {
+
+	if (result.count("emulated-tpm") && result.count("passthrough-tpm")) {
+		throw std::invalid_argument("Only one TPM type is acceptable");
+	} else {
+		LibvirtXMLGenerator::Elements::Devices::TpmElements::Tpm tpm;
+		if (result.count("emulated-tpm")) {
+			std::vector<std::string> tpmVector =
+				result["emulated-tpm"].as<std::vector<std::string>>();
+			tpm.model = tpmVector[0];
+			LibvirtXMLGenerator::Elements::Devices::TpmElements::
+				EmulatedTpmBackend backend;
+			backend.version = tpmVector[1];
+			tpm.backend = backend;
+			vm.devices.tpm = tpm;
+		} else if (result.count("passthrough-tpm")) {
+			std::vector<std::string> tpmVector =
+				result["passthrough-tpm"].as<std::vector<std::string>>();
+
+			tpm.model = tpmVector[0];
+			LibvirtXMLGenerator::Elements::Devices::TpmElements::
+				PassthroughTPMBackend backend;
+			backend.hostsPath = tpmVector[1];
+			tpm.backend = backend;
+			vm.devices.tpm = tpm;
+		}
+	}
 }

@@ -1,6 +1,7 @@
 #include "Devices.hpp"
 #include "devices/Disk.hpp"
 #include "devices/HotDev.hpp"
+#include "devices/Tpm.hpp"
 #include <string>
 
 std::string
@@ -23,6 +24,10 @@ LibvirtXMLGenerator::Elements::DeviceElements::Devices::getXml() const {
 			 HotDevUSBSource &hotdev : hotDevUSBs) {
 		xml.append(hotdev.getXml());
 	}
+	if (!tpm.model.empty()) {
+		xml.append(tpm.getXml());
+	}
+
 	xml.append("</devices>");
 	return xml;
 }
