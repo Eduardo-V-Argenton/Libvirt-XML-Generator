@@ -34,30 +34,34 @@
 std::string exec(const char *cmd);
 std::vector<int> convertStringToVector(const std::string &str);
 cxxopts::Options commands();
-void setDomain(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDomain(LibvirtXMLGenerator::VirtualMachine &vm,
 			   cxxopts::ParseResult &result);
-void setMemory(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setMemory(LibvirtXMLGenerator::VirtualMachine &vm,
 			   cxxopts::ParseResult &result);
-void setCpu(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setCpu(LibvirtXMLGenerator::VirtualMachine &vm,
 			cxxopts::ParseResult &result);
-void setOs(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setOs(LibvirtXMLGenerator::VirtualMachine &vm,
 		   cxxopts::ParseResult &result);
 // ToDo AutoSystemClock
-void setSystemClock(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setSystemClock(LibvirtXMLGenerator::VirtualMachine &vm,
 					cxxopts::ParseResult &result);
-void setDisk(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDisk(LibvirtXMLGenerator::VirtualMachine &vm,
 			 cxxopts::ParseResult &result);
-// ToDo autoAddController
-void setController(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setRemoteDisk(LibvirtXMLGenerator::VirtualMachine &vm,
 				   cxxopts::ParseResult &result);
-void setHotDevUsb(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+// ToDo autoAddController
+void setController(LibvirtXMLGenerator::VirtualMachine &vm,
+				   cxxopts::ParseResult &result);
+void setHotDevUsb(LibvirtXMLGenerator::VirtualMachine &vm,
 				  cxxopts::ParseResult &result);
-void setHotDevPci(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setHotDevPci(LibvirtXMLGenerator::VirtualMachine &vm,
 				  cxxopts::ParseResult &result);
-void saveFile(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void saveFile(LibvirtXMLGenerator::VirtualMachine &vm,
 			  cxxopts::ParseResult &result);
-void setDevices(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDevices(LibvirtXMLGenerator::VirtualMachine &vm,
 				cxxopts::ParseResult &result);
+void setPM(LibvirtXMLGenerator::VirtualMachine &vm,
+		   cxxopts::ParseResult &result);
 
 // ToDo Invalid Argument handling
 int main(int argc, char *argv[]) {
@@ -72,7 +76,7 @@ int main(int argc, char *argv[]) {
 			return 0;
 		}
 
-		LibvirtXMLGenerator::Main::VirtualMachine vm;
+		LibvirtXMLGenerator::VirtualMachine vm;
 
 		setDomain(vm, result);
 		setMemory(vm, result);
@@ -155,19 +159,26 @@ cxxopts::Options commands() {
 		"bootmenu-time", "Set BootMenu timeout, if 0 disable bootMenu",
 		cxxopts::value<int>()->default_value("0"))(
 		"d,disk",
-		"Add a virtual disk, format like format,absolute_path_file",
+		"Add a virtual disk, format like format,absolute_path_file,dev",
+		cxxopts::value<std::vector<std::string>>())(
+		"remote-disk",
+		"Add a remote disk, format like "
+		"format,protocol,url,hostname,port,username,password-type,password,dev",
 		cxxopts::value<std::vector<std::string>>())(
 		"usb-device", "Add a usb device, format like vendor,product",
 		cxxopts::value<std::vector<std::string>>())(
 		"pci-device", "Add a pci device, format like domain,bus,slot,function",
 		cxxopts::value<std::vector<int>>())(
 		"o, output", "Set the output file location",
-		cxxopts::value<std::string>()->default_value("output.xml"));
-
+		cxxopts::value<std::string>()->default_value("output.xml"))(
+		"suspend-to-mem", "Enable VM's to suspend to mem",
+		cxxopts::value<bool>()->default_value("false"))(
+		"suspend-to-disk", "Enable VM's to suspend to disk",
+		cxxopts::value<bool>()->default_value("false"));
 	return options;
 }
 
-void setDomain(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDomain(LibvirtXMLGenerator::VirtualMachine &vm,
 			   cxxopts::ParseResult &result) {
 
 	vm.domain.name = result["name"].as<std::string>();
@@ -179,18 +190,21 @@ void setDomain(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	}
 }
 
-void setMemory(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setMemory(LibvirtXMLGenerator::VirtualMachine &vm,
 			   cxxopts::ParseResult &result) {
 
 	vm.memory.memory = result["memory"].as<int>();
 }
 
-void setCpu(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setCpu(LibvirtXMLGenerator::VirtualMachine &vm,
 			cxxopts::ParseResult &result) {
 
 	vm.cpu.mode = result["cpu-mode"].as<std::string>();
 	std::vector<int> cpuTopology =
 		result["cpu-topology"].as<std::vector<int>>();
+	if(cpuTopology.size() != 3){
+	   throw std::invalid_argument("Invalid CPU Topology");
+	}
 	int quantVcpu = cpuTopology[0] * cpuTopology[1] * cpuTopology[2];
 	bool autoCpuDist = result["auto-cpu-placement"].as<bool>();
 	if (!autoCpuDist) {
@@ -264,7 +278,7 @@ void setCpu(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	vm.cpu.features.push_back(feature);
 }
 
-void setOs(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setOs(LibvirtXMLGenerator::VirtualMachine &vm,
 		   cxxopts::ParseResult &result) {
 
 	LibvirtXMLGenerator::Elements::OsElements::Os::BootDisk bootdisk;
@@ -286,7 +300,7 @@ void setOs(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	}
 }
 
-void setSystemClock(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setSystemClock(LibvirtXMLGenerator::VirtualMachine &vm,
 					cxxopts::ParseResult &result) {
 
 	LibvirtXMLGenerator::Elements::SystemClockElements::SystemClock::Timer
@@ -308,31 +322,61 @@ void setSystemClock(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	vm.clock.timers.push_back(timer);
 }
 
-void setDisk(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDisk(LibvirtXMLGenerator::VirtualMachine &vm,
 			 cxxopts::ParseResult &result) {
 
 	if (result.count("disk")) {
 		std::vector<std::string> disks =
 			result["disk"].as<std::vector<std::string>>();
-
+		if (disks.size() % 3 != 0){
+		    throw std::invalid_argument("Invalid Disk");
+		}
 		LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk disk;
-		char devLetter = 'a';
-		int numDisks = result.count("disk") * 2;
-		for (int i = 0; i < numDisks; i += 2) {
+		int numDisks = result.count("disk") * 3;
+		for (int i = 0; i < numDisks; i += 3) {
 			disk.driver.type = disks[i];
 			LibvirtXMLGenerator::Elements::Devices::DiskElements::SourceLocal
 				source;
 			source.file = disks[i + 1];
 			disk.source = source;
 			// arrumar o target
-			disk.target.dev = "sda";
+			disk.target.dev = disks[i + 2];
 			vm.devices.disks.push_back(disk);
-			devLetter++;
 		}
 	}
 }
 
-void setController(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setRemoteDisk(LibvirtXMLGenerator::VirtualMachine &vm,
+				   cxxopts::ParseResult &result) {
+
+	if (result.count("remote-disk")) {
+		std::vector<std::string> disks =
+			result["remote-disk"].as<std::vector<std::string>>();
+		if (disks.size() % 9 != 0){
+		    throw std::invalid_argument("Invalid remote disk");
+		}
+		LibvirtXMLGenerator::Elements::Devices::DiskElements::Disk disk;
+		int numDisks = result.count("disk") * 9;
+		for (int i = 0; i < numDisks; i += 9) {
+			disk.driver.type = disks[i];
+			LibvirtXMLGenerator::Elements::Devices::DiskElements::SourceNetwork
+				source;
+			source.protocol = disks[i + 1];
+			source.name = disks[i + 2];
+			source.host.name = disks[i + 3];
+			source.host.port = disks[i + 4];
+			source.auth.username = disks[i + 5];
+			source.auth.passwordType = disks[i + 6];
+			source.auth.password = disks[i + 7];
+			disk.source = source;
+			// arrumar o target
+			disk.target.dev = disks[i + 8];
+			disk.type = "network";
+			vm.devices.disks.push_back(disk);
+		}
+	}
+}
+void setController(LibvirtXMLGenerator::VirtualMachine &vm,
 				   cxxopts::ParseResult &result) {
 	for (int i = 0; i < 6; i++) {
 		LibvirtXMLGenerator::Elements::Devices::ControllerElements::Controller
@@ -343,12 +387,16 @@ void setController(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	}
 }
 
-void setHotDevUsb(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setHotDevUsb(LibvirtXMLGenerator::VirtualMachine &vm,
 				  cxxopts::ParseResult &result) {
 
 	if (result.count("usb-device")) {
 		std::vector<std::string> hotDevUsbs =
 			result["usb-device"].as<std::vector<std::string>>();
+			
+		if (hotDevUsbs.size() % 2 != 0){
+		    throw std::invalid_argument("Invalid USB device config");
+		}
 		int numUSBs = result.count("usb-device") * 2;
 		LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevUSBSource
 			usb;
@@ -360,12 +408,15 @@ void setHotDevUsb(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	}
 }
 
-void setHotDevPci(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setHotDevPci(LibvirtXMLGenerator::VirtualMachine &vm,
 				  cxxopts::ParseResult &result) {
 
 	if (result.count("pci-device")) {
 		std::vector<int> hotDevPCIs =
 			result["pci-device"].as<std::vector<int>>();
+		if (hotDevPCIs.size() % 4 != 0){
+		    throw std::invalid_argument("Invalid PCI device config");
+		}
 		int numPCIs = result.count("pci-device") * 4;
 		LibvirtXMLGenerator::Elements::Devices::HotDevElements::HotDevPCISource
 			gpu;
@@ -379,16 +430,17 @@ void setHotDevPci(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	}
 }
 
-void setDevices(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void setDevices(LibvirtXMLGenerator::VirtualMachine &vm,
 				cxxopts::ParseResult &result) {
 
 	setDisk(vm, result);
+	setRemoteDisk(vm, result);
 	setController(vm, result);
 	setHotDevUsb(vm, result);
 	setHotDevPci(vm, result);
 }
 
-void saveFile(LibvirtXMLGenerator::Main::VirtualMachine &vm,
+void saveFile(LibvirtXMLGenerator::VirtualMachine &vm,
 			  cxxopts::ParseResult &result) {
 
 	std::string outputFile = result["output"].as<std::string>();
@@ -403,4 +455,11 @@ void saveFile(LibvirtXMLGenerator::Main::VirtualMachine &vm,
 	} else {
 		throw std::runtime_error("Can't write the file");
 	}
+}
+
+void setPM(LibvirtXMLGenerator::VirtualMachine &vm,
+		   cxxopts::ParseResult &result) {
+
+	vm.pm.suspend_to_mem = result["suspend-to-mem"].as<bool>();
+	vm.pm.suspend_to_disk = result["suspend-to-disk"].as<bool>();
 }

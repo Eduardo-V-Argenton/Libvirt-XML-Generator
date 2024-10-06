@@ -12,7 +12,6 @@
 #include "elements/SystemClock.hpp"
 
 namespace LibvirtXMLGenerator {
-namespace Main {
 
 struct VirtualMachine : LibvirtXMLGenerator::Interfaces::XmlAble {
 	LibvirtXMLGenerator::Elements::DomainElement::Domain domain;
@@ -26,7 +25,6 @@ struct VirtualMachine : LibvirtXMLGenerator::Interfaces::XmlAble {
 
 	std::string getXml() const override;
 };
-} // namespace Main
 
 } // namespace LibvirtXMLGenerator
 

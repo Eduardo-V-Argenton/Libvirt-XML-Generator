@@ -38,7 +38,7 @@ std::string LibvirtXMLGenerator::Elements::Devices::DiskElements::
 	SourceNetwork::Auth::getXml() const {
 	return std::format("<auth username=\"{}\" ><secret type=\"{}\" "
 					   "usage=\"{}\" /></auth>",
-					   username, type, usage);
+					   username, passwordType, password);
 }
 
 std::string
@@ -48,15 +48,15 @@ LibvirtXMLGenerator::Elements::Devices::DiskElements::SourceNetwork::getXml()
 	std::string xml =
 		std::format("<source protocol=\"{}\" name=\"{}\"", protocol, name);
 
-	if (query != "") {
-		xml.append(std::format(" query=\"{}\" ", query));
-	}
+	// if (query != "") {
+	// 	xml.append(std::format(" query=\"{}\" ", query));
+	// }
 	xml.append(">");
 	xml.append(host.getXml());
 	if (auth.username != "") {
 		xml.append(auth.getXml());
 	}
-	xml.append(std::format("<ssl verify=\"{}\"/>", ssl ? "yes" : "no"));
+	// xml.append(std::format("<ssl verify=\"{}\"/>", ssl ? "yes" : "no"));
 	xml.append("</source>");
 	return xml;
 }

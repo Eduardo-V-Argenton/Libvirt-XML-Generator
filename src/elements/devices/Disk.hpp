@@ -26,8 +26,8 @@ struct SourceNetwork : Interfaces::XmlAble {
 
 	struct Auth : XmlAble {
 		std::string username = "";
-		std::string type = "";
-		std::string usage = "";
+		std::string passwordType = "";
+		std::string password = "";
 
 		std::string getXml() const override;
 	};
