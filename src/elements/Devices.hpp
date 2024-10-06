@@ -7,7 +7,7 @@
 #include "devices/Disk.hpp"
 #include "devices/Emulator.hpp"
 #include "devices/Filesystem.hpp"
-#include "devices/GraphicalFrameBuffer.hpp"
+#include "devices/Graphics.hpp"
 #include "devices/HotDev.hpp"
 #include "devices/Network.hpp"
 #include "devices/Tpm.hpp"
@@ -28,6 +28,7 @@ struct Devices : LibvirtXMLGenerator::Interfaces::XmlAble {
 	LibvirtXMLGenerator::Elements::Devices::TpmElements::Tpm tpm;
 	std::vector<LibvirtXMLGenerator::Elements::Devices::ControllerElements::Controller>
 		controllers;
+	std::vector<LibvirtXMLGenerator::Elements::Devices::NetworkElements::Network> networks;
 
 	std::string getXml() const override;
 };

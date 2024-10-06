@@ -14,11 +14,11 @@
 #include "elements/devices/Disk.hpp"
 // #include "elements/devices/Emulator.hpp"
 // #include "elements/devices/Filesystem.hpp"
-// #include "elements/devices/GraphicalFrameBuffer.hpp"
+#include "elements/devices/Graphics.hpp"
 #include "elements/devices/HotDev.hpp"
-// #include "elements/devices/Network.hpp"
+#include "elements/devices/Network.hpp"
 #include "elements/devices/Tpm.hpp"
-// #include "elements/devices/Video.hpp"
+#include "elements/devices/Video.hpp"
 
 #include <array>
 #include <cstdio>
@@ -29,7 +29,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <variant>
 #include <vector>
 
 std::string exec(const char *cmd);
@@ -65,6 +64,8 @@ void setPM(LibvirtXMLGenerator::VirtualMachine &vm,
 		   cxxopts::ParseResult &result);
 void setTpm(LibvirtXMLGenerator::VirtualMachine &vm,
 			cxxopts::ParseResult &result);
+void setNetwork(LibvirtXMLGenerator::VirtualMachine &vm,
+				cxxopts::ParseResult &result);
 
 // ToDo Invalid Argument handling
 int main(int argc, char *argv[]) {
@@ -187,6 +188,25 @@ cxxopts::Options commands() {
 		"Add the host's TPM device into VM format like model,path. "
 		"Available models are 'crb' and 'tis'. "
 		"Only accept that one or emulated-tpm, dont both",
+		cxxopts::value<std::vector<std::string>>())(
+		"nat-network", "Add a Nat Network into the VM, enter the network name",
+		cxxopts::value<std::string>()->default_value("default"))(
+		"nat-network-mac",
+		"Add a Nat Network with a mac address into the VM, format like "
+		"network-name,mac",
+		cxxopts::value<std::vector<std::string>>())(
+		"bridge-network", "Add a Bridge Network into the VM, enter the bridge ",
+		cxxopts::value<std::string>()->default_value("default"))(
+		"bridge-network-mac",
+		"Add a Bridge Network with a mac address into the VM, format like "
+		"bridge,mac",
+		cxxopts::value<std::vector<std::string>>())(
+		"direct-network",
+		"Add a Direct Network into the VM, format like mode,dev",
+		cxxopts::value<std::vector<std::string>>())(
+		"direct-network-mac",
+		"Add a Direct Network with a mac address into the VM, format like "
+		"mode,dev,mac",
 		cxxopts::value<std::vector<std::string>>());
 	return options;
 }
@@ -452,6 +472,7 @@ void setDevices(LibvirtXMLGenerator::VirtualMachine &vm,
 	setHotDevUsb(vm, result);
 	setHotDevPci(vm, result);
 	setTpm(vm, result);
+	setNetwork(vm, result);
 }
 
 void saveFile(LibvirtXMLGenerator::VirtualMachine &vm,
@@ -504,6 +525,95 @@ void setTpm(LibvirtXMLGenerator::VirtualMachine &vm,
 			backend.hostsPath = tpmVector[1];
 			tpm.backend = backend;
 			vm.devices.tpm = tpm;
+		}
+	}
+}
+
+void setNetwork(LibvirtXMLGenerator::VirtualMachine &vm,
+				cxxopts::ParseResult &result) {
+	LibvirtXMLGenerator::Elements::Devices::NetworkElements::Network network;
+
+	if (result.count("nat-network")) {
+
+		std::string networkVector = result["nat-network"].as<std::string>();
+
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::NATSource
+			source;
+		int numNetworks = result.count("nat-network");
+		for (int i = 0; i < numNetworks; i++) {
+			source.network = networkVector;
+			network.source = source;
+			vm.devices.networks.push_back(network);
+		}
+	}
+	if (result.count("nat-network-mac")) {
+
+		std::vector<std::string> networkVector =
+			result["nat-network-mac"].as<std::vector<std::string>>();
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::NATSource
+			source;
+		int numNetworks = result.count("nat-network-mac") * 2;
+		for (int i = 0; i < numNetworks; i += 2) {
+			source.network = networkVector[i];
+			network.mac = networkVector[i + 1];
+			network.source = source;
+			vm.devices.networks.push_back(network);
+		}
+	}
+	if (result.count("bridge-network")) {
+
+		std::string networkVector = result["bridge-network"].as<std::string>();
+
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::BridgeSource
+			source;
+		int numNetworks = result.count("bridge-network");
+		for (int i = 0; i < numNetworks; i++) {
+			source.bridge = networkVector[i];
+			network.source = source;
+			vm.devices.networks.push_back(network);
+		}
+	}
+	if (result.count("bridge-network-mac")) {
+
+		std::vector<std::string> networkVector =
+			result["bridge-network-mac"].as<std::vector<std::string>>();
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::BridgeSource
+			source;
+		int numNetworks = result.count("bridge-network-mac") * 2;
+		for (int i = 0; i < numNetworks; i += 2) {
+			source.bridge = networkVector[i];
+			network.mac = networkVector[i + 1];
+			network.source = source;
+			vm.devices.networks.push_back(network);
+		}
+	}
+	if (result.count("direct-network")) {
+
+		std::vector<std::string> networkVector =
+			result["direct-network"].as<std::vector<std::string>>();
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::DirectSource
+			source;
+		int numNetworks = result.count("direct-network") * 2;
+		for (int i = 0; i < numNetworks; i += 2) {
+			source.mode = networkVector[i];
+			source.dev = networkVector[i + 1];
+			network.source = source;
+			vm.devices.networks.push_back(network);
+		}
+	}
+	if (result.count("direct-network-mac")) {
+
+		std::vector<std::string> networkVector =
+			result["direct-network-mac"].as<std::vector<std::string>>();
+		LibvirtXMLGenerator::Elements::Devices::NetworkElements::DirectSource
+			source;
+		int numNetworks = result.count("direct-network-mac") * 3;
+		for (int i = 0; i < numNetworks; i += 3) {
+			source.mode = networkVector[i];
+			source.dev = networkVector[i + 1];
+			network.mac = networkVector[i + 2];
+			network.source = source;
+			vm.devices.networks.push_back(network);
 		}
 	}
 }
